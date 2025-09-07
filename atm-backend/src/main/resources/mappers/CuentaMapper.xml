@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.link.atm_service.mapper.CuentaMapper">
+
+    <resultMap id="CuentaMap" type="com.link.atm_service.dto.CuentaDTO">
+        <id property="id" column="id"/>
+        <result property="numeroCuenta" column="numero_cuenta"/>
+        <result property="saldo" column="saldo"/>
+        <result property="activa" column="activa"/>
+    </resultMap>
+
+    <select id="obtenerPorTarjeta" resultMap="CuentaMap">
+        SELECT c.id, c.numero_cuenta, c.saldo, c.activa
+        FROM cuenta c
+        JOIN tarjeta_cuenta tc ON c.id = tc.cuenta_id
+        JOIN tarjeta t ON t.id = tc.tarjeta_id
+        WHERE t.numero_tarjeta = #{numeroTarjeta}
+        AND t.activa = true
+    </select>
+
+
+</mapper>
+
+

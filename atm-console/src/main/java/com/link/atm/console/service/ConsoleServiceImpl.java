@@ -1,19 +1,25 @@
 package com.link.atm.console.service;
 
 import com.link.atm.console.client.BackendClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConsoleServiceImpl implements ConsoleService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleServiceImpl.class);
 
     private final BackendClient client;
 
     public ConsoleServiceImpl() {
-        this.client = new BackendClient("http://localhost:8080/api"); // URL del microservicio
+        this.client = new BackendClient("http://localhost:8080/api");
     }
 
     @Override
     public void login(String tarjeta) {
+        String last4 = tarjeta.length() > 4 ? tarjeta.substring(tarjeta.length() - 4) : tarjeta;
+        LOGGER.info("Intento de login para tarjeta ****{}", last4);
         boolean success = client.login(tarjeta);
-        System.out.println(success ? "Ingreso exitoso" : "Ingreso no exitoso");
+        LOGGER.info(success ? "Ingreso exitoso" : "Ingreso no exitoso");
     }
 
     @Override
