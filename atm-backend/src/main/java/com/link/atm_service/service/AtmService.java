@@ -33,4 +33,30 @@ public class AtmService {
         }
     }
 
+    public boolean extraer(String numeroTarjeta, String numeroCuenta, double monto) {
+        CuentaDTO cuenta = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
+
+        if (cuenta == null) return false;
+        if (!cuenta.isActiva()) return false;
+        if (cuenta.getSaldo() < monto) return false;
+
+        cuenta.setSaldo(cuenta.getSaldo() - monto);
+        cuentaMapper.actualizarSaldo(cuenta);
+
+        return true;
+    }
+
+    public boolean depositar(String numeroTarjeta, String numeroCuenta, double monto) {
+        CuentaDTO cuenta = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
+
+        if (cuenta == null) return false;
+        if (!cuenta.isActiva()) return false;
+
+        cuenta.setSaldo(cuenta.getSaldo() + monto);
+        cuentaMapper.actualizarSaldo(cuenta);
+
+        return true;
+    }
+
+
 }

@@ -21,7 +21,22 @@
         AND t.activa = true
     </select>
 
+    <select id="obtenerCuentaPorTarjetaYNumero" resultType="com.link.atm_service.dto.CuentaDTO">
+        SELECT c.id, c.numero_cuenta AS numeroCuenta, c.saldo, c.activa
+        FROM cuenta c
+        JOIN tarjeta_cuenta tc ON c.id = tc.cuenta_id
+        JOIN tarjeta t ON t.id = tc.tarjeta_id
+        WHERE t.numero_tarjeta = #{numeroTarjeta}
+        AND c.numero_cuenta = #{numeroCuenta}
+        AND t.activa = TRUE
+        AND c.activa = TRUE
+    </select>
 
+    <update id="actualizarSaldo">
+        UPDATE cuenta
+        SET saldo = #{saldo}
+        WHERE id = #{id}
+    </update>
 </mapper>
 
 

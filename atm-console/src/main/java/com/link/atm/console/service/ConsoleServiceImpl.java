@@ -25,13 +25,13 @@ public class ConsoleServiceImpl implements ConsoleService {
     @Override
     public void extraer(String tarjeta, String cbu, double amount) {
         boolean success = client.extraer(tarjeta, cbu, amount);
-        System.out.println(success ? "Retire su dinero" : "Error al extraer");
+        LOGGER.info(success ? "Retire su dinero" : "Error al extraer (tarjeta invalida, cuenta inactiva o saldo insuficiente)");
     }
 
     @Override
     public void depositar(String tarjeta, String cbu, double amount) {
         boolean success = client.depositar(tarjeta, cbu, amount);
-        System.out.println(success ? "Depósito exitoso" : "Error al depositar");
+        System.out.println(success ? "Deposito exitoso" : "Error al depositar (tarjeta invalida o cuenta inactiva)");
     }
 
     @Override

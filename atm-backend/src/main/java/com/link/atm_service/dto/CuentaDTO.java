@@ -21,4 +21,5 @@ public class CuentaDTO {
     public void setActiva(boolean activa) {
         this.activa = activa;
     }
+
 }
