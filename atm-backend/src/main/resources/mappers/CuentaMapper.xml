@@ -13,7 +13,7 @@
     </resultMap>
 
     <select id="obtenerPorTarjeta" resultMap="CuentaMap">
-        SELECT c.id, c.numero_cuenta, c.saldo, c.activa
+        SELECT c.id, c.numero_cuenta, c.saldo, c.activa, t.activa as tarjeta_activa
         FROM cuenta c
         JOIN tarjeta_cuenta tc ON c.id = tc.cuenta_id
         JOIN tarjeta t ON t.id = tc.tarjeta_id
@@ -28,6 +28,7 @@
         JOIN tarjeta t ON t.id = tc.tarjeta_id
         WHERE t.numero_tarjeta = #{numeroTarjeta}
         AND c.numero_cuenta = #{numeroCuenta}
+        AND t.activa = TRUE
         LIMIT 1
     </select>
 
@@ -48,6 +49,27 @@
         SELECT COUNT(*) > 0
         FROM tarjeta
         WHERE numero_tarjeta = #{numeroTarjeta}
+    </select>
+
+    <select id="estaTarjetaActiva" resultType="boolean">
+        SELECT activa
+        FROM tarjeta
+        WHERE numero_tarjeta = #{numeroTarjeta}
+    </select>
+
+    <select id="existeCuenta" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM cuenta
+        WHERE numero_cuenta = #{numeroCuenta}
+    </select>
+
+    <select id="existeAsociacionTarjetaCuenta" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM tarjeta_cuenta tc
+        JOIN tarjeta t ON t.id = tc.tarjeta_id
+        JOIN cuenta c ON c.id = tc.cuenta_id
+        WHERE t.numero_tarjeta = #{numeroTarjeta}
+        AND c.numero_cuenta = #{numeroCuenta}
     </select>
 
 </mapper>

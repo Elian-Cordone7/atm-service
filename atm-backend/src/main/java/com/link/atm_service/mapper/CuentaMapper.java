@@ -16,5 +16,10 @@ public interface CuentaMapper {
 
     boolean existeTarjeta(String numeroTarjeta);
 
+    boolean estaTarjetaActiva(String numeroTarjeta);
+
+    boolean existeCuenta(String numeroCuenta);
+
+    boolean existeAsociacionTarjetaCuenta(String numeroTarjeta, String numeroCuenta);
 }
 

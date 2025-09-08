@@ -10,18 +10,41 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Map;
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtmController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler({
             TarjetaNoExisteException.class,
+            TarjetaInactivaException.class
+    })
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> handleAuthExceptions(RuntimeException ex) {
+        String errorType = getErrorType(ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of(
+                        "errorType", errorType,
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler({
             CuentaNoExisteException.class,
+    })
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> handleNotFoundExceptions(RuntimeException ex) {
+        String errorType = getErrorType(ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        "errorType", errorType,
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler({
             TarjetaNoAsociadaException.class,
             CuentaInactivaException.class,
-            TarjetaInactivaException.class,
             SaldoInsuficienteException.class,
             MontoNegativoException.class,
             IllegalArgumentException.class
@@ -39,7 +62,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-
+        LOGGER.error("Error interno: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of(
                         "errorType", "ERROR_INTERNO",
@@ -49,10 +72,10 @@ public class GlobalExceptionHandler {
 
     private String getErrorType(RuntimeException ex) {
         if (ex instanceof TarjetaNoExisteException) return "TARJETA_NO_EXISTE";
+        if (ex instanceof TarjetaInactivaException) return "TARJETA_INACTIVA";
         if (ex instanceof CuentaNoExisteException) return "CUENTA_NO_EXISTE";
         if (ex instanceof TarjetaNoAsociadaException) return "TARJETA_NO_ASOCIADA";
         if (ex instanceof CuentaInactivaException) return "CUENTA_INACTIVA";
-        if (ex instanceof TarjetaInactivaException) return "TARJETA_INACTIVA";
         if (ex instanceof SaldoInsuficienteException) return "SALDO_INSUFICIENTE";
         if (ex instanceof MontoNegativoException) return "MONTO_NEGATIVO";
         if (ex instanceof IllegalArgumentException) return "PARAMETRO_INVALIDO";
