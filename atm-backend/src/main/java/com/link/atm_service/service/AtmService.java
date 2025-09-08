@@ -58,5 +58,14 @@ public class AtmService {
         return true;
     }
 
+    public double consultarSaldo(String numeroTarjeta, String numeroCuenta) {
+        CuentaDTO cuenta = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
+
+        if (cuenta == null || !cuenta.isActiva()) {
+            throw new RuntimeException("Cuenta no valida o inactiva");
+        }
+
+        return cuenta.getSaldo();
+    }
 
 }

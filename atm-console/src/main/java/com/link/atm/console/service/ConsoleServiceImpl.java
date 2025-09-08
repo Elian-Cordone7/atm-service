@@ -1,6 +1,7 @@
 package com.link.atm.console.service;
 
 import com.link.atm.console.client.BackendClient;
+import com.link.atm.console.util.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +12,9 @@ public class ConsoleServiceImpl implements ConsoleService {
     private final BackendClient client;
 
     public ConsoleServiceImpl() {
-        this.client = new BackendClient("http://localhost:8080/api");
+        String baseUrl = Config.get("backend.baseUrl");
+        this.client = new BackendClient(baseUrl);
+        LOGGER.info("BackendClient inicializado con baseUrl={}", baseUrl);
     }
 
     @Override
@@ -31,16 +34,17 @@ public class ConsoleServiceImpl implements ConsoleService {
     @Override
     public void depositar(String tarjeta, String cbu, double amount) {
         boolean success = client.depositar(tarjeta, cbu, amount);
-        System.out.println(success ? "Deposito exitoso" : "Error al depositar (tarjeta invalida o cuenta inactiva)");
+        LOGGER.info(success ? "Deposito exitoso" : "Error al depositar (tarjeta invalida o cuenta inactiva)");
     }
 
     @Override
     public void consultarSaldo(String tarjeta, String cbu) {
         Double saldo = client.consultarSaldo(tarjeta, cbu);
         if (saldo != null) {
-            System.out.printf("Su saldo es $ %.2f%n", saldo);
+            LOGGER.info("Su saldo es $ {}", saldo);
         } else {
-            System.out.println("Error al consultar saldo");
+            LOGGER.info("Error al consultar saldo (Cuenta no valida o inactiva)");
         }
     }
+
 }

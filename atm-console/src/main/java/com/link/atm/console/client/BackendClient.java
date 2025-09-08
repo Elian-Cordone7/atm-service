@@ -39,6 +39,38 @@ public class BackendClient {
         }
     }
 
+    public boolean extraer(String tarjeta, String cbu, double monto) {
+        return postJson("/extraer", tarjeta, cbu, monto);
+    }
+
+    public boolean depositar(String tarjeta, String cbu, double monto) {
+        return postJson("/depositar", tarjeta, cbu, monto);
+    }
+
+    public Double consultarSaldo(String tarjeta, String cbu) {
+        try {
+            URL url = new URL(baseUrl + "/saldo?tarjeta=" + tarjeta + "&cbu=" + cbu);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            int code = conn.getResponseCode();
+            LOGGER.info("GET /saldo sent. Tarjeta: {}, CBU: {}, response code: {}", tarjeta, cbu, code);
+
+            if (code != 200) return null;
+
+            Scanner scanner = new Scanner(conn.getInputStream());
+            String response = scanner.useDelimiter("\\A").next();
+            scanner.close();
+
+            Map<?, ?> map = mapper.readValue(response, Map.class);
+            return ((Number) map.get("saldo")).doubleValue();
+
+        } catch (Exception e) {
+            LOGGER.error("Error al consultar saldo", e);
+            return null;
+        }
+    }
+
     private boolean postJson(String path, String tarjeta, String cbu, double monto) {
         try {
             URL url = new URL(baseUrl + path);
@@ -67,15 +99,8 @@ public class BackendClient {
         } catch (IOException e) {
             LOGGER.error("Error en POST " + path, e);
             return false;
-        }
+}
     }
 
-    public boolean extraer(String tarjeta, String cbu, double monto) {
-        return postJson("/extraer", tarjeta, cbu, monto);
-    }
 
-    public boolean depositar(String tarjeta, String cbu, double monto) {
-        return postJson("/depositar", tarjeta, cbu, monto);
-    }
-    
 }

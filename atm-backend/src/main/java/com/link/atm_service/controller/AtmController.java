@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -64,6 +66,23 @@ public class AtmController {
             LOGGER.info("Error: no se pudo realizar el deposito (tarjeta invalida o cuenta inactiva)");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Error: no se pudo realizar el deposito (tarjeta invalida o cuenta inactiva)");
+        }
+    }
+
+    @GetMapping("/saldo")
+    public ResponseEntity<Map<String, Object>> consultarSaldo(
+            @RequestParam String tarjeta,
+            @RequestParam String cbu) {
+
+        Double saldo = atmService.consultarSaldo(tarjeta, cbu);
+
+        if (saldo != null) {
+            LOGGER.info("Saldo consultado: Tarjeta {}, CBU {}, Saldo {}", tarjeta, cbu, saldo);
+            return ResponseEntity.ok(Map.of("saldo", saldo));
+        } else {
+            LOGGER.warn("Error al consultar saldo: Tarjeta {} o CBU {} inválidos", tarjeta, cbu);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Tarjeta o cuenta inválida"));
         }
     }
 
