@@ -1,6 +1,7 @@
 package com.link.atm.console.service;
 
 import com.link.atm.console.client.BackendClient;
+import com.link.atm.console.client.BackendClientException;
 import com.link.atm.console.util.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,27 +15,38 @@ public class ConsoleServiceImpl implements ConsoleService {
     public ConsoleServiceImpl() {
         String baseUrl = Config.get("backend.baseUrl");
         this.client = new BackendClient(baseUrl);
-        LOGGER.info("BackendClient inicializado con baseUrl={}", baseUrl);
     }
 
     @Override
     public void login(String tarjeta) {
         String last4 = tarjeta.length() > 4 ? tarjeta.substring(tarjeta.length() - 4) : tarjeta;
         LOGGER.info("Intento de login para tarjeta ****{}", last4);
-        boolean success = client.login(tarjeta);
-        LOGGER.info(success ? "Ingreso exitoso" : "Ingreso no exitoso");
+        try {
+            boolean success = client.login(tarjeta);
+            LOGGER.info(success ? "Ingreso exitoso" : "Ingreso no exitoso");
+        } catch (BackendClientException e) {
+            LOGGER.error("Error: {}", e.getMessage());
+        }
     }
 
     @Override
     public void extraer(String tarjeta, String cbu, double amount) {
-        boolean success = client.extraer(tarjeta, cbu, amount);
-        LOGGER.info(success ? "Retire su dinero" : "Error al extraer (tarjeta invalida, cuenta inactiva o saldo insuficiente)");
+        try {
+            client.extraer(tarjeta, cbu, amount);
+            LOGGER.info("Retire su dinero");
+        } catch (BackendClientException e) {
+            LOGGER.error("Error en extraccion: {}", e.getMessage());
+        }
     }
 
     @Override
     public void depositar(String tarjeta, String cbu, double amount) {
-        boolean success = client.depositar(tarjeta, cbu, amount);
-        LOGGER.info(success ? "Deposito exitoso" : "Error al depositar (tarjeta invalida o cuenta inactiva)");
+        try {
+            client.depositar(tarjeta, cbu, amount);
+            LOGGER.info("Deposito exitoso");
+        } catch (BackendClientException e) {
+            LOGGER.info("Error en deposito: {}", e.getMessage());
+        }
     }
 
     @Override

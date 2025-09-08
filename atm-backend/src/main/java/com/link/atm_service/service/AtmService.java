@@ -1,8 +1,8 @@
 package com.link.atm_service.service;
 
-import com.link.atm_service.controller.AtmController;
 import com.link.atm_service.dto.CuentaDTO;
 import com.link.atm_service.dto.LoginResponse;
+import com.link.atm_service.exception.*;
 import com.link.atm_service.mapper.CuentaMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -25,7 +25,6 @@ public class AtmService {
         CuentaDTO cuenta = cuentaMapper.obtenerPorTarjeta(numeroTarjeta);
 
         LOGGER.info("Cuenta: "+ cuenta);
-
         if (cuenta != null && cuenta.isActiva()) {
             return new LoginResponse(true, "Login exitoso", numeroTarjeta);
         } else {
@@ -34,11 +33,27 @@ public class AtmService {
     }
 
     public boolean extraer(String numeroTarjeta, String numeroCuenta, double monto) {
-        CuentaDTO cuenta = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
 
-        if (cuenta == null) return false;
-        if (!cuenta.isActiva()) return false;
-        if (cuenta.getSaldo() < monto) return false;
+        if (monto <= 0) {
+            throw new MontoNegativoException("El monto a extraer debe ser mayor a cero");
+        }
+
+        CuentaDTO cuenta = cuentaMapper.obtenerCuentaPorNumero(numeroCuenta);
+        if (cuenta == null) {
+            throw new CuentaNoExisteException("La cuenta " + numeroCuenta + " no existe");
+        }
+        if (!cuenta.isActiva()) {
+            throw new CuentaInactivaException("La cuenta " + numeroCuenta + " esta inactiva");
+        }
+
+        CuentaDTO cuentaAsociada = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
+        if (cuentaAsociada == null) {
+            throw new TarjetaNoAsociadaException("La tarjeta no está asociada a la cuenta");
+        }
+
+        if (cuenta.getSaldo() < monto) {
+            throw new SaldoInsuficienteException("Saldo insuficiente");
+        }
 
         cuenta.setSaldo(cuenta.getSaldo() - monto);
         cuentaMapper.actualizarSaldo(cuenta);
@@ -47,10 +62,23 @@ public class AtmService {
     }
 
     public boolean depositar(String numeroTarjeta, String numeroCuenta, double monto) {
-        CuentaDTO cuenta = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
 
-        if (cuenta == null) return false;
-        if (!cuenta.isActiva()) return false;
+        if (monto <= 0) {
+            throw new MontoNegativoException("El monto a depositar debe ser mayor a cero");
+        }
+
+        CuentaDTO cuenta = cuentaMapper.obtenerCuentaPorNumero(numeroCuenta);
+        if (cuenta == null) {
+            throw new CuentaNoExisteException("La cuenta " + numeroCuenta + " no existe");
+        }
+        if (!cuenta.isActiva()) {
+            throw new CuentaInactivaException("La cuenta esta inactiva");
+        }
+
+        CuentaDTO cuentaAsociada = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
+        if (cuentaAsociada == null) {
+            throw new TarjetaNoAsociadaException("La tarjeta no esta asociada a la cuenta");
+        }
 
         cuenta.setSaldo(cuenta.getSaldo() + monto);
         cuentaMapper.actualizarSaldo(cuenta);
@@ -59,13 +87,25 @@ public class AtmService {
     }
 
     public double consultarSaldo(String numeroTarjeta, String numeroCuenta) {
-        CuentaDTO cuenta = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
 
-        if (cuenta == null || !cuenta.isActiva()) {
-            throw new RuntimeException("Cuenta no valida o inactiva");
+        if (!cuentaMapper.existeTarjeta(numeroTarjeta)) {
+            throw new TarjetaNoExisteException("La tarjeta " + numeroTarjeta + " no existe");
         }
 
-        return cuenta.getSaldo();
+        CuentaDTO cuentaSola = cuentaMapper.obtenerCuentaPorNumero(numeroCuenta);
+        if (cuentaSola == null) {
+            throw new CuentaNoExisteException("La cuenta " + numeroCuenta + " no existe");
+        }
+        if (!cuentaSola.isActiva()) {
+            throw new CuentaInactivaException("La cuenta esta inactiva");
+        }
+
+        CuentaDTO cuentaAsociada = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
+        if (cuentaAsociada == null) {
+            throw new TarjetaNoAsociadaException("La tarjeta " + numeroTarjeta + " no esta asociada a la cuenta " + numeroCuenta);
+        }
+
+        return cuentaAsociada.getSaldo();
     }
 
 }

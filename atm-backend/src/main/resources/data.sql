@@ -1,12 +1,15 @@
 INSERT INTO tarjeta (numero_tarjeta, activa) VALUES
 ('1234567890123456', true),
-('9876543210987654', true);
-
+('9876543210987654', true),
+('1111222233334444', false),
+('5555666677778888', true);
 
 INSERT INTO cuenta (numero_cuenta, saldo, activa) VALUES
 ('0001', 5000.00, true),
-('0002', 3000.00, true);
-
+('0002', 3000.00, true),
+('0003', 1000.00, false),
+('0004', 100.00, true),
+('0005', 0.00, true);
 
 INSERT INTO tarjeta_cuenta (tarjeta_id, cuenta_id)
 SELECT t.id, c.id
@@ -19,3 +22,15 @@ SELECT t.id, c.id
 FROM tarjeta t
 JOIN cuenta c ON c.numero_cuenta = '0002'
 WHERE t.numero_tarjeta = '9876543210987654';
+
+INSERT INTO tarjeta_cuenta (tarjeta_id, cuenta_id)
+SELECT t.id, c.id
+FROM tarjeta t
+JOIN cuenta c ON c.numero_cuenta = '0003'
+WHERE t.numero_tarjeta = '1111222233334444';
+
+INSERT INTO tarjeta_cuenta (tarjeta_id, cuenta_id)
+SELECT t.id, c.id
+FROM tarjeta t
+JOIN cuenta c ON c.numero_cuenta = '0004'
+WHERE t.numero_tarjeta = '1234567890123456';

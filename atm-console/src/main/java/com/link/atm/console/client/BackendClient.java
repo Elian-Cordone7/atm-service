@@ -1,4 +1,5 @@
 package com.link.atm.console.client;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import java.util.Scanner;
 public class BackendClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackendClient.class);
-
     private final String baseUrl;
     private final ObjectMapper mapper;
 
@@ -30,21 +30,25 @@ public class BackendClient {
             conn.setRequestMethod("GET");
 
             int code = conn.getResponseCode();
-            LOGGER.info("Se realizo una solicitud de login para la tarjeta '{}'. Resultado HTTP: {}", tarjeta, code);
+            LOGGER.info("Login para tarjeta '{}'. Resultado: {}", tarjeta, code);
 
-            return code == 200;
+            if (code == 200) return true;
+            if (code == 401) return false;
+
+            String errorMessage = getStructuredErrorMessage(conn);
+            throw new BackendClientException("Error en login: " + errorMessage);
+
         } catch (IOException e) {
-            LOGGER.info("Error en login", e);
-            return false;
+            throw new BackendClientException("Error de conexion en login", e);
         }
     }
 
-    public boolean extraer(String tarjeta, String cbu, double monto) {
-        return postJson("/extraer", tarjeta, cbu, monto);
+    public void extraer(String tarjeta, String cbu, double monto) {
+        postJson("/extraer", tarjeta, cbu, monto, "extraccion");
     }
 
-    public boolean depositar(String tarjeta, String cbu, double monto) {
-        return postJson("/depositar", tarjeta, cbu, monto);
+    public void depositar(String tarjeta, String cbu, double monto) {
+        postJson("/depositar", tarjeta, cbu, monto, "deposito");
     }
 
     public Double consultarSaldo(String tarjeta, String cbu) {
@@ -54,9 +58,12 @@ public class BackendClient {
             conn.setRequestMethod("GET");
 
             int code = conn.getResponseCode();
-            LOGGER.info("GET /saldo sent. Tarjeta: {}, CBU: {}, response code: {}", tarjeta, cbu, code);
+            LOGGER.info("GET /saldo. -Tarjeta: {}, -CBU: {}, -Codigo: {}", tarjeta, cbu, code);
 
-            if (code != 200) return null;
+            if (code != 200) {
+                String errorMessage = getStructuredErrorMessage(conn);
+                handleSaldoError(code, errorMessage, tarjeta, cbu);
+            }
 
             Scanner scanner = new Scanner(conn.getInputStream());
             String response = scanner.useDelimiter("\\A").next();
@@ -65,13 +72,14 @@ public class BackendClient {
             Map<?, ?> map = mapper.readValue(response, Map.class);
             return ((Number) map.get("saldo")).doubleValue();
 
+        } catch (BackendClientException e) {
+            throw e;
         } catch (Exception e) {
-            LOGGER.error("Error al consultar saldo", e);
-            return null;
+            throw new BackendClientException("Error al consultar saldo", e);
         }
     }
 
-    private boolean postJson(String path, String tarjeta, String cbu, double monto) {
+    private void postJson(String path, String tarjeta, String cbu, double monto, String operation) {
         try {
             URL url = new URL(baseUrl + path);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -92,15 +100,76 @@ public class BackendClient {
             }
 
             int code = conn.getResponseCode();
-            LOGGER.info("POST {} sent. Tarjeta: {}, Cuenta: {}, Monto: {}, Response code: {}",
+            LOGGER.info("POST {} -Tarjeta: {}, -CBU: {}, -Monto: {}, -Codigo: {}",
                     path, tarjeta, cbu, monto, code);
 
-            return code == 200;
+            if (code != 200) {
+                String errorMessage = getStructuredErrorMessage(conn);
+                handleOperationError(code, errorMessage, operation, tarjeta, cbu);
+            }
+
+        } catch (BackendClientException e) {
+            throw e;
         } catch (IOException e) {
-            LOGGER.error("Error en POST " + path, e);
-            return false;
-}
+            LOGGER.error("Error de conexion en " + operation, e);
+            throw new BackendClientException("Error de conexion en " + operation, e);
+        }
     }
 
+    private String getStructuredErrorMessage(HttpURLConnection conn) {
+        try {
+            if (conn.getErrorStream() != null) {
+                Scanner errorScanner = new Scanner(conn.getErrorStream());
+                String errorResponse = errorScanner.useDelimiter("\\A").next();
+                errorScanner.close();
 
+                try {
+                    Map<?, ?> errorMap = mapper.readValue(errorResponse, Map.class);
+                    String errorType = (String) errorMap.get("errorType");
+                    String message = (String) errorMap.get("message");
+
+                    if (errorType != null && message != null) {
+                        return errorType + ": " + message;
+                    }
+                    return errorResponse;
+
+                } catch (Exception e) {
+                    return errorResponse;
+                }
+            }
+            return conn.getResponseMessage();
+        } catch (IOException e) {
+            return "Error desconocido";
+        }
+    }
+
+    private void handleSaldoError(int code, String errorMessage, String tarjeta, String cbu) {
+        if (errorMessage.contains("TARJETA_NO_EXISTE")) {
+            throw new BackendClientException("La tarjeta " + tarjeta + " no existe");
+        } else if (errorMessage.contains("CUENTA_NO_EXISTE")) {
+            throw new BackendClientException("La cuenta " + cbu + " no existe");
+        } else if (errorMessage.contains("TARJETA_NO_ASOCIADA")) {
+            throw new BackendClientException("La tarjeta no esta asociada a esta cuenta");
+        } else if (errorMessage.contains("CUENTA_INACTIVA")) {
+            throw new BackendClientException("La cuenta " + cbu + " esta inactiva");
+        } else {
+            throw new BackendClientException(errorMessage);
+        }
+    }
+
+    private void handleOperationError(int code, String errorMessage, String operation, String tarjeta, String cbu) {
+        if (errorMessage.contains("TARJETA_NO_EXISTE")) {
+            throw new BackendClientException("La tarjeta " + tarjeta + " no existe");
+        } else if (errorMessage.contains("CUENTA_NO_EXISTE")) {
+            throw new BackendClientException("La cuenta " + cbu + " no existe");
+        } else if (errorMessage.contains("TARJETA_NO_ASOCIADA")) {
+            throw new BackendClientException("La tarjeta no esta asociada a esta cuenta");
+        } else if (errorMessage.contains("CUENTA_INACTIVA")) {
+            throw new BackendClientException("La cuenta " + cbu + " esta inactiva");
+        } else if (errorMessage.contains("SALDO_INSUFICIENTE")) {
+            throw new BackendClientException("Saldo insuficiente para la " + operation);
+        } else {
+            throw new BackendClientException(errorMessage);
+        }
+    }
 }

@@ -18,7 +18,7 @@
         JOIN tarjeta_cuenta tc ON c.id = tc.cuenta_id
         JOIN tarjeta t ON t.id = tc.tarjeta_id
         WHERE t.numero_tarjeta = #{numeroTarjeta}
-        AND t.activa = true
+        LIMIT 1
     </select>
 
     <select id="obtenerCuentaPorTarjetaYNumero" resultType="com.link.atm_service.dto.CuentaDTO">
@@ -28,8 +28,14 @@
         JOIN tarjeta t ON t.id = tc.tarjeta_id
         WHERE t.numero_tarjeta = #{numeroTarjeta}
         AND c.numero_cuenta = #{numeroCuenta}
-        AND t.activa = TRUE
-        AND c.activa = TRUE
+        LIMIT 1
+    </select>
+
+    <select id="obtenerCuentaPorNumero" resultType="com.link.atm_service.dto.CuentaDTO">
+        SELECT c.*
+        FROM cuenta c
+        WHERE c.numero_cuenta = #{numeroCuenta}
+        LIMIT 1
     </select>
 
     <update id="actualizarSaldo">
@@ -37,6 +43,13 @@
         SET saldo = #{saldo}
         WHERE id = #{id}
     </update>
+
+    <select id="existeTarjeta" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM tarjeta
+        WHERE numero_tarjeta = #{numeroTarjeta}
+    </select>
+
 </mapper>
 
 

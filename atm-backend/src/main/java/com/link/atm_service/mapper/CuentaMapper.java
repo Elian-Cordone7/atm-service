@@ -10,7 +10,11 @@ public interface CuentaMapper {
 
     CuentaDTO obtenerCuentaPorTarjetaYNumero(String numeroTarjeta, String numeroCuenta);
 
+    CuentaDTO obtenerCuentaPorNumero(String numeroCuenta);
+
     void actualizarSaldo(CuentaDTO cuenta);
+
+    boolean existeTarjeta(String numeroTarjeta);
 
 }
 
