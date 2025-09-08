@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class TarjetaNoExisteException extends RuntimeException {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtmController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TarjetaNoExisteException.class);
 
     public TarjetaNoExisteException(String message) {
         super(message);

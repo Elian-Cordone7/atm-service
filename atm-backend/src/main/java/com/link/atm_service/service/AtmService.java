@@ -48,7 +48,7 @@ public class AtmService {
 
         CuentaDTO cuentaAsociada = cuentaMapper.obtenerCuentaPorTarjetaYNumero(numeroTarjeta, numeroCuenta);
         if (cuentaAsociada == null) {
-            throw new TarjetaNoAsociadaException("La tarjeta no está asociada a la cuenta");
+            throw new TarjetaNoAsociadaException("La tarjeta no esta asociada a la cuenta");
         }
 
         if (cuenta.getSaldo() < monto) {

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class SaldoInsuficienteException extends RuntimeException {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtmController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaldoInsuficienteException.class);
 
     public SaldoInsuficienteException(String message) {
         super(message);

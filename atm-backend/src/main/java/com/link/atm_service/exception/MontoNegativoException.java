@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class MontoNegativoException extends RuntimeException {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtmController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MontoNegativoException.class);
 
     public MontoNegativoException(String message) {
         super(message);

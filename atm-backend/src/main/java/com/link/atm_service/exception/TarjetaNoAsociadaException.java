@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class TarjetaNoAsociadaException extends RuntimeException {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtmController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TarjetaNoAsociadaException.class);
 
     public TarjetaNoAsociadaException(String message) {
         super(message);

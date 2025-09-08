@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class CuentaNoExisteException extends RuntimeException {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtmController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CuentaNoExisteException.class);
 
     public CuentaNoExisteException(String message) {
         super(message);

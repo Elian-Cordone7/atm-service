@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class CuentaInactivaException extends RuntimeException {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtmController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CuentaInactivaException.class);
 
     public CuentaInactivaException(String message) {
         super(message);
