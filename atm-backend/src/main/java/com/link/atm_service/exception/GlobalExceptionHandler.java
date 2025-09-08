@@ -112,8 +112,15 @@ public class GlobalExceptionHandler {
     private void registrarTransaccionFallida(Exception ex, HttpServletRequest request, String errorCategory) {
         try {
             String numeroTarjeta = null;
-            String cbu = null;
+            String cbu = "NO_APLICA";
             Double monto = 0.0;
+
+            if ("GET".equalsIgnoreCase(request.getMethod())) {
+                numeroTarjeta = request.getParameter("numeroTarjeta");
+                if (numeroTarjeta == null) {
+                    numeroTarjeta = request.getParameter("tarjeta");
+                }
+            }
 
             String method = request.getMethod();
             String contentType = request.getContentType();
@@ -176,12 +183,7 @@ public class GlobalExceptionHandler {
             }
 
             if (numeroTarjeta == null) {
-                numeroTarjeta = "NO_PROVIDED";
-                LOGGER.warn("tarjeta no encontrado en request");
-            }
-            if (cbu == null) {
-                cbu = "NO_PROVIDED";
-                LOGGER.warn("cbu no encontrado en request");
+                numeroTarjeta = "TARJETA_NO_PROV";
             }
 
             LOGGER.debug("Final values - tarjeta: {}, cbu: {}, monto: {}", numeroTarjeta, cbu, monto);
@@ -205,7 +207,7 @@ public class GlobalExceptionHandler {
         if (requestURI.contains("/saldo")) return "CONSULTA_SALDO";
         if (requestURI.contains("/extraer")) return "RETIRO_EFECTIVO";
         if (requestURI.contains("/depositar")) return "DEPOSITO_EFECTIVO";
-        if (requestURI.contains("/transferencia")) return "TRANSFERENCIA";
+        if (requestURI.contains("/login")) return "LOGIN";
         return "OPER_DESCONOCIDA";
     }
 }
