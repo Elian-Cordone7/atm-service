@@ -24,10 +24,6 @@ ControllerAdvice Global para manejo centralizado de excepciones
 
 DTO Pattern para transferencia de datos entre capas
 
-Dependency Injection con constructor injection para mejor testabilidad
-
-Single Responsibility Principle en cada componente del sistema
-
 RESTful API Design con endpoints semanticos y verbos HTTP apropiados
 
 Estrategia de Manejo de Transacciones
@@ -44,37 +40,17 @@ Funcionalidades Postergadas para una Futura Version:
 
 Sistema de transferencias
 
-Historial de transacciones completo con endpoints de consulta
-
 Autenticacion JWT robusta con tokens de seguridad
 
 Dockerizacion del servicio para despliegue en contenedores
 
 API documentation con Swagger/OpenAPI
 
-Frontend web para operaciones desde navegador
-
-Sistema de reportes y analiticas de transacciones
-
-Simplificaciones Implementadas
-Validacion basica de datos de entrada en lugar de validacion compleja
-
-Manejo simple de concurrencia sin bloqueos optimistas/pesimistas avanzados
-
-Logging basico en lugar de sistema completo de monitoreo
-
-Base de datos en memoria en lugar de sistema de persistencia distribuido
-
-Autenticacion simplificada sin sistema completo de roles y permisos
-
 Decisiones Tecnicas Justificadas
 MyBatis sobre JPA para mayor control sobre las queries SQL
 
 H2 simplicidad en desarrollo (facil migracion)
 
-Separacion frontend/backend para permitir multiples clientes
-
-Enfoque en core banking primero, features extensibles despues
 
 🚀 Caracteristicas Principales
 ✅ Funcionalidades Implementadas
